@@ -1,9 +1,22 @@
 import os
 import logging
+import sys
 from pathlib import Path
 from typing import List
+from importlib.resources import files
+from importlib.abc import Traversable
 
-from abfe.utils.abfe_helpers_hrex import *
+
+from abfe.utils.abfe_helpers_hrex import (
+    generate_boresch_restraints,
+    copy_complex,
+    create_fep_system,
+    create_index,
+    create_directories_with_MDP_pertuball_smaller_dumps,
+    create_simulations_list,
+    gen_hrex_submission_script
+)
+
 
 
 class ABFESetup:
@@ -12,21 +25,17 @@ class ABFESetup:
     """
 
     def __init__(self, base_path: str, ligands: List[str], num_replicates: int, 
-                 template_script_path: str, contd_script_path: str, archer_nodes: int = 22):
+                    archer_nodes: int = 22):
         """
         Parameters:
         - base_path: The base directory containing ligand folders.
         - ligands: List of ligand folder names to prepare.
         - num_replicates: Number of replicates to set up for each ligand.
-        - template_script_path: Path to the submission script template.
-        - contd_script_path: Path to the continuation submission script template.
         - archer_nodes: Number of nodes to request in submission scripts (default: 22).
         """
         self.base_path = Path(base_path).resolve()
         self.ligands = ligands
         self.num_replicates = num_replicates
-        self.template_script_path = template_script_path
-        self.contd_script_path = contd_script_path
         self.archer_nodes = archer_nodes
 
         logging.basicConfig(
@@ -85,15 +94,15 @@ class ABFESetup:
                 for i in range(21 if phase == 'vdw' else 12 if phase == 'rest' else 11)
             ])
 
-            gen_hrex_submission_script(   ##TAKE OUT 
-                template_path=self.template_script_path,
+            gen_hrex_submission_script(
+                template_path=files("abfe.utils.cluster.job_script_template.abfe") / "job_complex_archer_hrex_template.sh",
                 job_name=ligand,
                 archer_nodes=self.archer_nodes,
                 simulation_list_string=simulation_list_string
             )
 
-            gen_hrex_submission_script(   ##TAKE OUT
-                template_path=self.contd_script_path,
+            gen_hrex_submission_script(   
+                template_path=files("abfe.utils.cluster.job_script_template.abfe") / "job_complex_archer_hrex_cont_template.sh",
                 new_script_name='job_complex_archer_contd.sh',
                 job_name=ligand,
                 archer_nodes=self.archer_nodes,
@@ -117,8 +126,6 @@ def main():
     parser.add_argument('--base_path', required=True, help='Base path containing ligand folders.')
     parser.add_argument('--ligands', nargs='+', required=True, help='Ligand folder names to process.')
     parser.add_argument('--num_replicates', type=int, default=3, help='Number of replicates to setup per ligand.')
-    parser.add_argument('--template_script_path', required=True, help='Path to submission script template.')
-    parser.add_argument('--contd_script_path', required=True, help='Path to continuation submission script template.')
     parser.add_argument('--archer_nodes', type=int, default=22, help='Number of nodes to use in scripts.')
 
     args = parser.parse_args()
@@ -127,8 +134,6 @@ def main():
         base_path=args.base_path,
         ligands=args.ligands,
         num_replicates=args.num_replicates,
-        template_script_path=args.template_script_path,
-        contd_script_path=args.contd_script_path,
         archer_nodes=args.archer_nodes
     )
     setup.setup()

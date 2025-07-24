@@ -622,19 +622,16 @@ def addions(input_file = "solv_fix.gro",water_group = '18'):
     except subprocess.CalledProcessError:
         raise Exception("Error: gmx genion command failed.")
     
-def cp_mdps(source_dir):
+def cp_mdps(source_dir: Traversable):
     """
-    Copies Membrane protein .mdp files to the current directory
+    Copies membrane protein .mdp files to the current directory.
+    Accepts a Traversable object, e.g. from importlib.resources.files.
     """
-    # List all files in the source directory
-    files = os.listdir(source_dir)
-    
-    # Filter files ending with .mdp extension
-    mdp_files = [file for file in files if file.endswith('.mdp')]
-    
-    # Copy each .mdp file to the current directory
-    for mdp_file in mdp_files:
-        shutil.copy(os.path.join(source_dir, mdp_file), os.getcwd())
+    for f in source_dir.iterdir():
+        if f.name.endswith('.mdp'):
+            with f.open('rb') as src_file:
+                with open(f.name, 'wb') as dest_file:
+                    shutil.copyfileobj(src_file, dest_file)
 
 def create_index(gro_file):
     """
