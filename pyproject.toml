@@ -5,29 +5,25 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "abflow"
 version = "0.1.0"
-packages = [
-    "abfe",
-    "abfe.utils",
-    "abfe.utils.cluster",
-    "abfe.utils.cluster.job_script_template",
-    "abfe.utils.cluster.job_script_template.equilibration",
-    "abfe.utils.cluster.job_script_template.abfe",
-    "abfe.utils.data",
-    "abfe.utils.data.mdps",
-    "abfe.utils.data.mdps.mdps_vanilla_memprot"
+description = "Automated free energy simulation workflows for ligand binding"
+authors = [
+    { name = "Antonia Florina Panescu", email = "antonia.panescu@somewhere.ox.ac.uk" }
+]
+dependencies = [
+    "MDAnalysis",
+    "openff-toolkit",
+    "numpy",
+    "scipy"
 ]
 
-include = [
-    "abfe/utils/cluster/job_script_template/equilibration/*.sh",
-    "abfe/utils/cluster/job_script_template/abfe/*.sh",
-    "abfe/utils/data/mdps/mdps_vanilla_memprot/*.mdp"
-]
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["abfe*"]
 
 [tool.setuptools.package-data]
 "abfe.utils.cluster.job_script_template.equilibration" = ["*.sh"]
 "abfe.utils.cluster.job_script_template.abfe" = ["*.sh"]
 "abfe.utils.data.mdps.mdps_vanilla_memprot" = ["*.mdp"]
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["abfe*"]

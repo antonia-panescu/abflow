@@ -68,7 +68,7 @@ class SimulationSetup:
         cp_mdps(mdp_dir)  
         merge_gro_files('solv_fix.gro', self.crystal_water_gro)   ### ALSO CHANGE (?)
         add_water2topology(self.crystal_water_count)
-        addions('solv_fix.gro')  ## output from water_deletor.pl in solvate_system
+        addions('solv_fix_crystal_water.gro')  ## output from water_deletor.pl in solvate_system
         create_index('system_solv_ions.gro')  ## output from addions
         addtoppar2top("topol.top")  ## make specific?
         copy_jobscripts_vanilla(submission_script_templates, compound_name, self.num_nodes) 

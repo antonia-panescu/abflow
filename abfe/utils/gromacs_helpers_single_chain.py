@@ -5,6 +5,9 @@ import sys
 import subprocess
 import glob
 import importlib.resources
+from importlib.abc import Traversable
+from pathlib import Path
+
 
 from abfe.utils.smirnoff_param_func import smirnoff_parameterize
 from abfe.utils.bespokefit_param_func import bespokefit_parameterize
