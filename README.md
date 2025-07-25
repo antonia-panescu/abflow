@@ -24,8 +24,7 @@ setup = SimulationSetup(
     protein_folder      = "/ABS/PATH/TO/PARAMETERISED_PROTEIN",       # …/protein_prep/protein_param
     sdf_folder          = "/ABS/PATH/TO/LIGAND_SDFS",                 # folder full of *.sdf
     crystal_water_gro   = "/ABS/PATH/TO/crystal_waters.gro",          # the file you merge in
-    mdp_templates_path  = "/ABS/PATH/TO/MDP_TEMPLATES",               # dir that contains your .mdp files
-    jobscript_template_path = "/ABS/PATH/TO/JOBSCRIPT_TEMPLATES",     # dir with SLURM/Archer scripts
+
 
     # the three below are optional (defaults shown):
     solvate_water_count = 10286,
@@ -56,8 +55,6 @@ setup = ABFESetup(
     base_path="/path/to/simulations",
     ligands=["Ligand1", "Ligand2"],
     num_replicates=3,
-    template_script_path="/path/to/job_template.sh",
-    contd_script_path="/path/to/job_template_contd.sh",
     archer_nodes=22
 )
 
