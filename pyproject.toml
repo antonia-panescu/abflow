@@ -7,7 +7,7 @@ name = "abflow"
 version = "0.1.0"
 description = "Automated free energy simulation workflows for ligand binding"
 authors = [
-    { name = "Antonia Florina Panescu", email = "antonia.panescu@somewhere.ox.ac.uk" }
+    { name = "Antonia Panescu", email = "antonia.panescu@outlook.com" }
 ]
 dependencies = [
     "MDAnalysis",
@@ -27,3 +27,7 @@ include = ["abfe*"]
 "abfe.utils.cluster.job_script_template.equilibration" = ["*.sh"]
 "abfe.utils.cluster.job_script_template.abfe" = ["*.sh"]
 "abfe.utils.data.mdps.mdps_vanilla_memprot" = ["*.mdp"]
+"abfe.utils.data.forcefield_dir" = ["amber99sb-star-ildn-mut.ff/**/*"]
+"abflow.abfe.utils.data.mdps.super_mdp_files_pertuball" = ["*.mdp"]
+"abflow.abfe.utils.data.mdps.super_mdp_files_pertuball_smaller_dumps" = ["*.mdp"]
+"abflow.abfe.utils.data.mdps.super_mdp_files_soluble" = ["*.mdp"]

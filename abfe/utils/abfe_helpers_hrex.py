@@ -6,6 +6,25 @@ import logging
 from pathlib import Path
 from rdkit import Chem
 from importlib.abc import Traversable
+import importlib.resources as pkg_resources
+import numpy as _np
+from itertools import chain
+
+
+import MDAnalysis as mda
+import MDRestraintsGenerator
+from MDAnalysis.core.groups import AtomGroup
+from MDRestraintsGenerator.search import find_ligand_atoms, FindHostAtoms
+from MDRestraintsGenerator.restraints import FindBoreschRestraint
+
+
+#sys.path.insert(0, '/biggin/b230/magd5710/Documents/Nithish_FEPA/Util/MDresgen/MDRestraintsGenerator')
+
+
+from abfe.utils import data 
+from abfe.utils.data import forcefield_dir 
+from abfe.utils.data.mdps import super_mdp_files_pertuball, super_mdp_files_pertuball_smaller_dumps, super_mdp_files_soluble 
+
 
 
 def run_gmx_command(command):      ## REFACTORED 
@@ -18,8 +37,11 @@ def run_gmx_command(command):      ## REFACTORED
         logging.error(f"GROMACS command failed: {e}")
         raise RuntimeError(f"GROMACS command failed: {e}")
 
-def check_boresch(vanilla_folder: Path):        # REFACTORED
+
+def check_boresch(vanilla_folder):  # Accepts str or Path
     """Check that vanilla folder and required files exist."""
+    vanilla_folder = Path(vanilla_folder)  # Ensure it's a Path object
+
     tpr_file = vanilla_folder / 'prod.tpr'
     xtc_file = vanilla_folder / 'prod.xtc'
 
@@ -28,47 +50,58 @@ def check_boresch(vanilla_folder: Path):        # REFACTORED
     if not tpr_file.exists() or not xtc_file.exists():
         raise FileNotFoundError(f"Missing prod.tpr or prod.xtc in {vanilla_folder}")
 
-def generate_boresch_restraints(vanilla_folder_name='vanilla', resname='unk', input_gro = 'npt.gro'):     
-    """Creates Boresch restraints using the Boresch Restraint Generator"""
-    boresch_folder = 'boresch'
-    if not os.path.exists(boresch_folder):
-        os.mkdir(boresch_folder)
-        logging.info('Boresch folder created!')
-    os.chdir(boresch_folder)
-    
-    check_boresch(vanilla_folder_name=vanilla_folder_name)
-    
-    logging.info('Creating a GROMACS tpr file...')
-    #run_gmx_command(f'gmx grompp -f ../../{vanilla_folder_name}/prod.mdp -c ../../{vanilla_folder_name}/{input_gro} -r ../../{vanilla_folder_name}/{input_gro} -p ../../{vanilla_folder_name}/topol.top -o prod.tpr -n ../../{vanilla_folder_name}/index.ndx')
-    run_gmx_command(f'gmx grompp -f ../../{vanilla_folder_name}/prod.mdp -c ../../{vanilla_folder_name}/{input_gro} -r ../../{vanilla_folder_name}/{input_gro} -p ../../{vanilla_folder_name}/topol_water_removed.top -o prod.tpr -n ../../{vanilla_folder_name}/index.ndx')
 
 
-    logging.info('Running Boresch Restraint Generator with fit_fc...')
-    script_path = os.path.abspath(os.path.expanduser('/biggin/b230/magd5710/Documents/Nithish_FEPA/Util/MDresgen/MDRestraintsGenerator/scripts/BoreschRestraintGMX.py'))
-    command = [
-        'python',
-        script_path,
-        '--top', 'prod.tpr',
-        '--traj', f'../../{vanilla_folder_name}/prod.xtc',
-        '--host_selection', 'protein and name CA',
-        '--ligand_selection', f'resname {resname}'
+def generate_boresch_restraints(
+    vanilla_folder_name: str,
+    abfe_path: Path,
+    resname: str = "unk",
+    input_gro: str = "npt.gro",
+    gmx_exec: str = "gmx"
+):
+    vanilla = Path(vanilla_folder_name).resolve()
+    boresch = abfe_path / "boresch"
+    boresch.mkdir(parents=True, exist_ok=True)
+
+    cwd_orig = Path.cwd()
+    os.chdir(boresch)
+
+    # 1) build the tpr
+    logging.info("Creating GROMACS tpr file…")
+    subprocess.run(
+        f"{gmx_exec} grompp "
+        f"-f {vanilla/'prod.mdp'} "
+        f"-c {vanilla/input_gro} "
+        f"-r {vanilla/input_gro} "
+        f"-p {vanilla/'topol_water_removed.top'} "
+        f"-n {vanilla/'index.ndx'} "
+        f"-o prod.tpr",
+        shell=True, check=True
+    )
+
+    # 2) locate BoreschRestraintGMX.py in the cloned repo
+    #    go up two levels from the module's __file__ to get the project root
+    module_path = Path(MDRestraintsGenerator.__file__)
+    project_root = module_path.parents[1]
+    script_path = project_root / "scripts" / "BoreschRestraintGMX.py"
+    if not script_path.exists():
+        raise FileNotFoundError(f"Cannot find BoreschRestraintGMX.py at {script_path!s}")
+
+    # 3) run it
+    logging.info("Running BoreschRestraintGMX.py…")
+    bo_cmd = [
+        sys.executable, str(script_path),
+        "--top",  "prod.tpr",
+        "--traj", str(vanilla/"prod.xtc"),
+        "--host_selection",   "protein and name CA",
+        "--ligand_selection", f"resname {resname}"
     ]
+    with open("resgen_output.txt","w") as out, open("resgen_error.txt","w") as err:
+        subprocess.run(bo_cmd, check=True, stdout=out, stderr=err)
 
-    # Specify the output files
-    stdout_file = "resgen_output.txt"
-    stderr_file = "resgen_error.txt"
+    os.chdir(cwd_orig)
+    logging.info(f"Boresch restraints generated and dumped into {boresch}")
 
-    # Run the command and save output and error to files
-    try:
-        with open(stdout_file, "w") as out_f, open(stderr_file, "w") as err_f:
-            subprocess.run(command, stdout=out_f, stderr=err_f, check=True)
-        logging.info(f"Output saved to: {stdout_file}")
-        logging.info(f"Error saved to: {stderr_file}")
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error running Boresch Restraint Generator: {e}")
-        sys.exit(1)
-    
-    os.chdir('..')
 
 def check_line(filename, text):
     """Check if a specific text is present in a file."""
@@ -99,21 +132,26 @@ def add_boresch_to_topol(source_file, destination_file):
             logging.error(f"Error reading or writing files: {e}")
             sys.exit(1)
 
-def copy_complex(vanilla_folder_name='vanilla', copy_ff = True):
-    """Copy necessary files to the complex folder and update topology."""
-    # Create a folder called complex
-    os.mkdir('complex')
-    os.chdir('complex')
-    # Copy the file 'ClosestRestraintFrame.gro','BoreschRestraint.top' from the boresch folder to the abfe/complex folder into the complex folder
-    shutil.copy('../boresch/ClosestRestraintFrame.gro', 'complex.gro')
-    shutil.copy('../boresch/BoreschRestraint.top', 'BoreschRestraint.top')
-    #shutil.copy(f'../../{vanilla_folder_name}/topol.top', 'complex.top')
-    shutil.copy(f'../../{vanilla_folder_name}/topol_water_removed.top', 'complex.top')
-    shutil.copytree(f'../../{vanilla_folder_name}/toppar', 'toppar')
+
+def copy_complex(vanilla_folder_name: str, abfe_path: Path, copy_ff: bool = True):
+    vanilla_folder = Path(vanilla_folder_name).resolve()
+    complex_dir = abfe_path / "complex"
+    complex_dir.mkdir(parents=True, exist_ok=True)
+
+    shutil.copy(abfe_path / 'boresch' / 'ClosestRestraintFrame.gro', complex_dir / 'complex.gro')
+    shutil.copy(abfe_path / 'boresch' / 'BoreschRestraint.top', complex_dir / 'BoreschRestraint.top')
+    shutil.copy(vanilla_folder / 'topol_water_removed.top', complex_dir / 'complex.top')
+    shutil.copytree(vanilla_folder / 'toppar', complex_dir / 'toppar', dirs_exist_ok=True)
+
     if copy_ff:
-        shutil.copytree('/biggin/b211/reub0138/Util/forcefields/amber99sb-star-ildn-mut.ff', 'amber99sb-star-ildn-mut.ff')
-    add_boresch_to_topol('BoreschRestraint.top','complex.top')
-    logging.info("Files copied and topology updated successfully.")
+        ff_src = pkg_resources.files(forcefield_dir) / 'amber99sb-star-ildn-mut.ff'
+        ff_dst = complex_dir / 'amber99sb-star-ildn-mut.ff'
+        shutil.copytree(ff_src, ff_dst, dirs_exist_ok=True)
+
+    add_boresch_to_topol(complex_dir / 'BoreschRestraint.top', complex_dir / 'complex.top')
+    logging.info(f"Copied all required files into {complex_dir}")
+
+
 
 def calculate_total_charge(sdf_file):
     """Calculate the total formal charge of a molecule from an SDF file."""
@@ -136,7 +174,9 @@ def create_fep_system(lig_name: str, vanilla_folder: Path, force=False):        
     """Create a Free Energy Perturbation (FEP) system for a given ligand."""
     try:
         # Calculate the ligand charge
-        lig_sdf = vanilla_folder / 'smirnoff' / f"{lig_name}.sdf"
+        lig_suffix = lig_name.split("_")[-1]  
+        lig_sdf = vanilla_folder / 'smirnoff' / f"{lig_suffix}.sdf"
+
         lig_ch = calculate_total_charge(lig_sdf)
         if lig_ch != 0:
             logging.warning(f"Ligand {lig_name} has a non-zero charge of {lig_ch} e.")
@@ -147,15 +187,16 @@ def create_fep_system(lig_name: str, vanilla_folder: Path, force=False):        
                     return
 
         # Define the command parameters
-        alch_mthd = 'co-annihilation'
+        alch_mthd = 'co-annihilation' if lig_ch != 0 else 'None'
         lig_resname = "unk"
-        lig_itp = f"toppar/{lig_name}.itp"
-        lig_atomtype_itp = f"toppar/{lig_name}_atomtypes.itp"
+        lig_itp = f"toppar/{lig_suffix}.itp"
+        lig_atomtype_itp = f"toppar/{lig_suffix}_atomtypes.itp"
         script_path = Path(__file__).parent / "add_alchemical_ion_v3_pertuball.py"
+        
         command = [
             'python',
-            script_path,
-            '--lig_charge', lig_ch,
+            str(script_path),
+            '--lig_charge', str(lig_ch),
             '--alch_ion_method', alch_mthd,
             '--lig', lig_resname,
             '--lig_itp', lig_itp,
@@ -166,6 +207,8 @@ def create_fep_system(lig_name: str, vanilla_folder: Path, force=False):        
         subprocess.run(command, check=True)
         print('Ligand itp:', lig_itp)
         print('Ligand atomtype itp:', lig_atomtype_itp)
+
+
     except subprocess.CalledProcessError as e:
         print(f"ERROR with Alchemical Ion v3: {e}")
         sys.exit(1)
@@ -199,8 +242,16 @@ def create_index(input_file, output_file):
         logging.error(f"Error copying index files: {e}")
         sys.exit(1)
 
-def create_directories_with_MDP_pertuball(leg, pml_index, wiai_index):
-    """Create directories and MDP files for different stages of simulation."""
+def create_directories_with_MDP_pertuball(leg: str, pml_index: str, wiai_index: str):
+    """
+    Create FEP simulation directories and fill them with modified .mdp files
+    from the packaged super_mdp_files_pertuball directory.
+
+    Parameters:
+        leg (str): Perturbation leg ('coul', 'rest', 'vdw').
+        pml_index (str): Index group for protein/membrane/ligand.
+        wiai_index (str): Index group for water/ions/alchemical ion.
+    """
     leg_windows = {
         "coul": (11, 12),
         "rest": (12, 0),
@@ -209,33 +260,51 @@ def create_directories_with_MDP_pertuball(leg, pml_index, wiai_index):
 
     windows, state_id_start = leg_windows.get(leg, (0, 0))
     state_id = state_id_start
+    stages = ["enmin", "npt_b", "npt_pr", "nvt", "prod"]
 
     for i in range(windows):
         i_str = f"{i:02d}"
-        directory_path = f"{leg}.{i_str}"
-        os.makedirs(directory_path, exist_ok=True)
-        
-        for stage in ["enmin", "npt_b", "npt_pr", "nvt", "prod"]:
-            stage_directory = os.path.join(directory_path, stage)
-            os.makedirs(stage_directory, exist_ok=True)
-            
-            template_file = f"/biggin/b211/reub0138/Util/super_mdp_files_pertuball/{leg}.{stage}.super.mdp"
-            output_file = f"{directory_path}/{stage}/{leg}.{stage}.{i_str}.mdp"
+        dir_base = Path(f"{leg}.{i_str}")
+        dir_base.mkdir(exist_ok=True)
 
-            with open(template_file, 'r') as f:
-                template_content = f.read()
-            
-            modified_content = template_content.replace("Protein_LIG_POPC", pml_index)
-            modified_content = modified_content.replace("Water_and_ions_B_CL", wiai_index)
-            modified_content = modified_content.replace("<state>", str(state_id))
+        for stage in stages:
+            stage_dir = dir_base / stage
+            stage_dir.mkdir(exist_ok=True)
 
-            with open(output_file, 'w') as f:
-                f.write(modified_content)
+            template_filename = f"{leg}.{stage}.super.mdp"
+            output_filename = stage_dir / f"{leg}.{stage}.{i_str}.mdp"
+
+            try:
+                with pkg_resources.files(super_mdp_files_pertuball).joinpath(template_filename).open("r") as f:
+                    template_content = f.read()
+
+                modified_content = (
+                    template_content
+                    .replace("Protein_LIG_POPC", pml_index)
+                    .replace("Water_and_ions_B_CL", wiai_index)
+                    .replace("<state>", str(state_id))
+                )
+
+                with open(output_filename, "w") as f_out:
+                    f_out.write(modified_content)
+
+                logging.info(f"Written: {output_filename}")
+            except FileNotFoundError:
+                logging.error(f"Template file not found: {template_filename}")
+                continue
 
         state_id += 1
 
-def create_directories_with_MDP_pertuball_smaller_dumps(leg, pml_index, wiai_index):
-    """Create directories and MDP files for different stages of simulation."""
+def create_directories_with_MDP_pertuball_smaller_dumps(leg: str, pml_index: str, wiai_index: str):
+    """
+    Create FEP simulation directories using MDPs with smaller dump frequencies,
+    sourced from packaged `super_mdp_files_pertuball_smaller_dumps`.
+
+    Parameters:
+        leg (str): 'coul', 'rest', or 'vdw'.
+        pml_index (str): Index group name for protein/membrane/ligand.
+        wiai_index (str): Index group name for water/ions/alchemical ion.
+    """
     leg_windows = {
         "coul": (11, 12),
         "rest": (12, 0),
@@ -244,33 +313,51 @@ def create_directories_with_MDP_pertuball_smaller_dumps(leg, pml_index, wiai_ind
 
     windows, state_id_start = leg_windows.get(leg, (0, 0))
     state_id = state_id_start
+    stages = ["enmin", "npt_b", "npt_pr", "nvt", "prod"]
 
     for i in range(windows):
         i_str = f"{i:02d}"
-        directory_path = f"{leg}.{i_str}"
-        os.makedirs(directory_path, exist_ok=True)
-        
-        for stage in ["enmin", "npt_b", "npt_pr", "nvt", "prod"]:
-            stage_directory = os.path.join(directory_path, stage)
-            os.makedirs(stage_directory, exist_ok=True)
-            
-            template_file = f"/biggin/b211/reub0138/Util/super_mdp_files_pertuball_smaller_dumps/{leg}.{stage}.super.mdp"
-            output_file = f"{directory_path}/{stage}/{leg}.{stage}.{i_str}.mdp"
+        dir_base = Path(f"{leg}.{i_str}")
+        dir_base.mkdir(exist_ok=True)
 
-            with open(template_file, 'r') as f:
-                template_content = f.read()
-            
-            modified_content = template_content.replace("Protein_LIG_POPC", pml_index)
-            modified_content = modified_content.replace("Water_and_ions_B_CL", wiai_index)
-            modified_content = modified_content.replace("<state>", str(state_id))
+        for stage in stages:
+            stage_dir = dir_base / stage
+            stage_dir.mkdir(exist_ok=True)
 
-            with open(output_file, 'w') as f:
-                f.write(modified_content)
+            template_filename = f"{leg}.{stage}.super.mdp"
+            output_filename = stage_dir / f"{leg}.{stage}.{i_str}.mdp"
+
+            try:
+                with pkg_resources.files(super_mdp_files_pertuball_smaller_dumps).joinpath(template_filename).open("r") as f:
+                    template_content = f.read()
+
+                modified_content = (
+                    template_content
+                    .replace("Protein_LIG_POPC", pml_index)
+                    .replace("Water_and_ions_B_CL", wiai_index)
+                    .replace("<state>", str(state_id))
+                )
+
+                with open(output_filename, "w") as f_out:
+                    f_out.write(modified_content)
+
+                logging.info(f"Written: {output_filename}")
+            except FileNotFoundError:
+                logging.error(f"Missing MDP template: {template_filename}")
+                continue
 
         state_id += 1
 
-def create_directories_with_soluble_MDP(leg, pml_index, wiai_index):
-    """Create directories and MDP files for soluble simulations."""
+def create_directories_with_soluble_MDP(leg: str, pml_index: str, wiai_index: str):
+    """
+    Create FEP simulation directories for soluble systems using MDP templates
+    from the `super_mdp_files_soluble` package data.
+
+    Parameters:
+        leg (str): Perturbation leg ('coul', 'rest', 'vdw').
+        pml_index (str): Index group name for protein/ligand.
+        wiai_index (str): Index group name for water/ions/alchemical ion.
+    """
     leg_windows = {
         "coul": 11,
         "rest": 12,
@@ -278,28 +365,38 @@ def create_directories_with_soluble_MDP(leg, pml_index, wiai_index):
     }
 
     windows = leg_windows.get(leg, 0)
+    stages = ["enmin", "npt_b", "npt_pr", "nvt", "prod"]
 
     for i in range(windows):
         i_str = f"{i:02d}"
-        directory_path = f"{leg}.{i_str}"
-        os.makedirs(directory_path, exist_ok=True)
-        
-        for stage in ["enmin", "npt_b", "npt_pr", "nvt", "prod"]:
-            stage_directory = os.path.join(directory_path, stage)
-            os.makedirs(stage_directory, exist_ok=True)
-            
-            template_file = f"/biggin/b211/reub0138/Util/super_mdp_files_soluble/{leg}.{stage}.super.mdp"
-            output_file = f"{directory_path}/{stage}/{leg}.{stage}.{i_str}.mdp"
+        dir_base = Path(f"{leg}.{i_str}")
+        dir_base.mkdir(exist_ok=True)
 
-            with open(template_file, 'r') as f:
-                template_content = f.read()
-            
-            modified_content = template_content.replace("Protein_LIG_POPC", pml_index)
-            modified_content = modified_content.replace("Water_and_ions_B_CL", wiai_index)
-            modified_content = modified_content.replace("<state>", i_str)
+        for stage in stages:
+            stage_dir = dir_base / stage
+            stage_dir.mkdir(exist_ok=True)
 
-            with open(output_file, 'w') as f:
-                f.write(modified_content)
+            template_filename = f"{leg}.{stage}.super.mdp"
+            output_filename = stage_dir / f"{leg}.{stage}.{i_str}.mdp"
+
+            try:
+                with pkg_resources.files(super_mdp_files_soluble).joinpath(template_filename).open("r") as f:
+                    template_content = f.read()
+
+                modified_content = (
+                    template_content
+                    .replace("Protein_LIG_POPC", pml_index)
+                    .replace("Water_and_ions_B_CL", wiai_index)
+                    .replace("<state>", i_str)
+                )
+
+                with open(output_filename, "w") as f_out:
+                    f_out.write(modified_content)
+
+                logging.info(f"Wrote: {output_filename}")
+            except FileNotFoundError:
+                logging.error(f"Missing soluble MDP template: {template_filename}")
+                continue
 
 
 def create_simulations_list():

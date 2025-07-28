@@ -1,0 +1,19 @@
+name: test
+channels: 
+  - conda-forge
+dependencies:
+    # Base depends
+  - python
+  - pip
+  - MDAnalysis
+  - matplotlib
+  - scipy
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+
+    # Pip-only installs
+  #- pip:
+  #  - codecov
+

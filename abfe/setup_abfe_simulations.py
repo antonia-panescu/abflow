@@ -4,8 +4,6 @@ import sys
 from pathlib import Path
 from typing import List
 from importlib.resources import files
-from importlib.abc import Traversable
-
 
 from abfe.utils.abfe_helpers_hrex import (
     generate_boresch_restraints,
@@ -18,21 +16,12 @@ from abfe.utils.abfe_helpers_hrex import (
 )
 
 
-
 class ABFESetup:
     """
     ABFESetup handles the preparation of folders for ABFE simulations.
     """
 
-    def __init__(self, base_path: str, ligands: List[str], num_replicates: int, 
-                    archer_nodes: int = 22):
-        """
-        Parameters:
-        - base_path: The base directory containing ligand folders.
-        - ligands: List of ligand folder names to prepare.
-        - num_replicates: Number of replicates to set up for each ligand.
-        - archer_nodes: Number of nodes to request in submission scripts (default: 22).
-        """
+    def __init__(self, base_path: str, ligands: List[str], num_replicates: int, archer_nodes: int = 22):
         self.base_path = Path(base_path).resolve()
         self.ligands = ligands
         self.num_replicates = num_replicates
@@ -59,27 +48,35 @@ class ABFESetup:
 
             for rep in range(1, self.num_replicates + 1):
                 suffix = f"van1_hrex_r{rep}"
-                vanilla_folder_name = 'vanilla'  # This could be made configurable
+                vanilla_folder_name = f"vanilla_rep_{rep}"
                 self._setup_abfe_folder(ligand_dir, suffix, vanilla_folder_name)
 
     def _setup_abfe_folder(self, ligand_dir: Path, suffix: str, vanilla_folder_name: str):
         try:
             ligname = ligand_dir.name
             abfe_folder = ligand_dir / f"abfe_{suffix}"
+
             if abfe_folder.exists():
                 logging.warning(f"{abfe_folder} already exists. Skipping...")
                 return
 
             abfe_folder.mkdir(exist_ok=True)
-            logging.info(f"Ensured folder exists: {abfe_folder}")
-            os.chdir(abfe_folder)
-            logging.info(f"Created folder: {abfe_folder}")
+            complex_path = abfe_folder / "complex"
+            complex_path.mkdir(exist_ok=True)
+            logging.info(f"Created folder: {abfe_folder} and {complex_path}")
+            os.chdir(complex_path)  # << all operations now run inside complex/
 
-            generate_boresch_restraints(vanilla_folder_name=vanilla_folder_name)
-            copy_complex(vanilla_folder_name=vanilla_folder_name)
-            create_fep_system(ligname)
-            create_index('complex_coul.gro', 'index.ndx')
 
+            vanilla_path = ligand_dir / vanilla_folder_name
+            if not vanilla_path.exists():
+                logging.error(f"Vanilla directory does not exist: {vanilla_path}")
+                return
+
+            generate_boresch_restraints(vanilla_folder_name=vanilla_path, abfe_path=abfe_folder)
+
+            copy_complex(vanilla_folder_name=vanilla_path, abfe_path=abfe_folder)
+            create_fep_system(ligname, vanilla_path)
+            create_index("complex_coul.gro", "index.ndx")
             protein_membrane_ligand_index = "Protein_unk_PA_PC_OL"
             water_ion_alch_ion_index = "Water_and_ions"
 
@@ -96,7 +93,7 @@ class ABFESetup:
 
             gen_hrex_submission_script(
                 template_path=files("abfe.utils.cluster.job_script_template.abfe") / "job_complex_archer_hrex_template.sh",
-                job_name=ligand,
+                job_name=ligname,
                 archer_nodes=self.archer_nodes,
                 simulation_list_string=simulation_list_string
             )
@@ -104,18 +101,18 @@ class ABFESetup:
             gen_hrex_submission_script(   
                 template_path=files("abfe.utils.cluster.job_script_template.abfe") / "job_complex_archer_hrex_cont_template.sh",
                 new_script_name='job_complex_archer_contd.sh',
-                job_name=ligand,
+                job_name=ligname,
                 archer_nodes=self.archer_nodes,
                 simulation_list_string=simulation_list_string
             )
 
-            # Create an empty plumed.dat
-            (abfe_folder / 'plumed.dat').touch()
+            (complex_path / 'plumed.dat').touch()
 
-            logging.info(f"ABFE folder setup completed for {ligand} replicate {suffix}")
+
+            logging.info(f"ABFE folder setup completed for {ligname} replicate {suffix}")
 
         except Exception as e:
-            logging.error(f"Error setting up ABFE folder for {ligand} replicate {suffix}: {e}")
+            logging.error(f"Error setting up ABFE folder for {ligand_dir.name} replicate {suffix}: {e}")
             raise
 
 

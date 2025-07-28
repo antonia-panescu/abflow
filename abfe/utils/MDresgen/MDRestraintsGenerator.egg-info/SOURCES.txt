@@ -1,0 +1,5 @@
+setup.py
+MDRestraintsGenerator.egg-info/PKG-INFO
+MDRestraintsGenerator.egg-info/SOURCES.txt
+MDRestraintsGenerator.egg-info/dependency_links.txt
+MDRestraintsGenerator.egg-info/top_level.txt
