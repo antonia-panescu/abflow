@@ -3,7 +3,7 @@ Code for setting up and running replica ABFE simulations
 
 ## HPC-specific dependencies
 
-In addition to the Python environment (`abflow.yml`), this workflow requires the following modules to be loaded on the HPC environment before running:
+In addition to the Python environment (`abfe_environment.yml`), this workflow requires the following modules to be loaded on the HPC environment before running:
 
 ```bash
 module load GROMACS/2023
@@ -11,12 +11,13 @@ module load GROMACS/2023
 
 MDRestraintsGenerator package needs to be installed with no-dependencies flag to avoid clashing with scipy module: 
 
+```
 cd ~/Documents/abflow/src  # or wherever you keep your editable sources
 git clone https://github.com/Nithishwer/MDRestraintsGenerator.git
 cd MDRestraintsGenerator
 git checkout 03914398839e9cf912b6da2a4e04ce29b09b69c0
 pip install --no-deps -e .
-
+```
 
 ## Usage
 
