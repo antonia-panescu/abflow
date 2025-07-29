@@ -18,13 +18,9 @@ from MDRestraintsGenerator.search import find_ligand_atoms, FindHostAtoms
 from MDRestraintsGenerator.restraints import FindBoreschRestraint
 
 
-#sys.path.insert(0, '/biggin/b230/magd5710/Documents/Nithish_FEPA/Util/MDresgen/MDRestraintsGenerator')
-
-
 from abfe.utils import data 
 from abfe.utils.data import forcefield_dir 
 from abfe.utils.data.mdps import super_mdp_files_pertuball, super_mdp_files_pertuball_smaller_dumps, super_mdp_files_soluble 
-
 
 
 def run_gmx_command(command):      ## REFACTORED 

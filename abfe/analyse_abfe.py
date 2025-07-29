@@ -2,9 +2,10 @@ import os
 import shutil
 import time
 import pandas as pd
+import argparse
 from loguru import logger
-from alchemlyb.workflows import ABFE
 from typing import List, Dict
+from alchemlyb.workflows import ABFE
 
 logger.add("abfe_analysis.log", rotation="10 MB")
 
@@ -12,20 +13,20 @@ class ABFEAnalyzer:
     def __init__(
         self,
         project_root: str,
-        abfe_subdirs: List[str],
+        abfe_replicates: int,
         ignore_folders: List[str] = None,
         legs_config: Dict[str, int] = None,
-        temperature: float = 298,
+        temperature: float = 298.0,
     ):
         self.project_root = project_root
-        self.abfe_subdirs = abfe_subdirs
+        self.abfe_replicates = abfe_replicates
         self.ignore_folders = ignore_folders or []
         self.legs_config = legs_config or {
-            "complex": {"rest": 11, "coul": 10, "vdw": 21},
+            "complex": {"bonded": 11, "coul": 10, "vdw": 21},
             "ligand": {"coul": 11, "vdw": 21},
         }
         self.temperature = temperature
-        logger.info(f"Initialized ABFEAnalyzer for root: {self.project_root}")
+        logger.info(f"Initialized ABFEAnalyzer at {project_root} for {abfe_replicates} replicates.")
 
     @staticmethod
     def check_folder(path: str):
@@ -56,6 +57,13 @@ class ABFEAnalyzer:
         os.chdir(path)
         logger.info(f"Running alchemlyb workflow in {path}")
 
+        found = any(fname.endswith(".xvg") and fname.startswith("dhdl.") for fname in os.listdir("."))
+        if not found:
+            logger.warning(f"No DHDL files found in {path}, skipping analysis.")
+            os.chdir(cwd)
+            return
+
+        start_time = time.time()
         workflow = ABFE(
             units="kcal/mol",
             software="GROMACS",
@@ -78,6 +86,7 @@ class ABFEAnalyzer:
         )
         workflow.summary.to_csv("ABFE_summary.csv")
         workflow.convergence.to_csv("ABFE_convergence.csv")
+        logger.info(f"Time taken for analysis: {time.time() - start_time:.2f}s")
         logger.info(f"Workflow complete for {path}")
         os.chdir(cwd)
 
@@ -93,10 +102,23 @@ class ABFEAnalyzer:
     def extract_dG_from_summary(filepath: str, leg: str, stage: str) -> List[float]:
         df = pd.read_csv(filepath)
         df.columns = ["PROCESS", "ID", "MBAR", "MBAR_Error", "BAR", "BAR_Error", "TI", "TI_Error"]
-        row = df.loc[df["ID"] == leg].squeeze()
+        matching = df[df["ID"] == leg]
+
+        if matching.empty:
+            raise ValueError(f"No matching ID='{leg}' found in {filepath}")
+        if len(matching) > 1:
+            raise ValueError(f"Multiple rows found for ID='{leg}' in {filepath}. Please ensure unique IDs.")
+
+        row = matching.squeeze()
         return [f"{stage}_{leg}"] + row.iloc[2:].astype(float).tolist()
 
+
     def compile_results(self, analysis_path: str):
+        output_csv = os.path.join(analysis_path, "analysis", "abfe_results.csv")
+        if os.path.exists(output_csv):
+            logger.info(f"Results already compiled in {output_csv}, skipping.")
+            return
+
         logger.info(f"Compiling results in {analysis_path}")
         os.chdir(analysis_path)
         os.chdir("analysis")
@@ -106,7 +128,7 @@ class ABFEAnalyzer:
             self.extract_dG_from_summary("ligand/ABFE_summary.csv", "coul", "ligand"),
             self.extract_dG_from_summary("ligand/ABFE_summary.csv", "vdw", "ligand"),
             ["anal_rest", rest_dG, 0, rest_dG, 0, rest_dG, 0],
-            self.extract_dG_from_summary("complex/ABFE_summary.csv", "rest", "complex"),
+            self.extract_dG_from_summary("complex/ABFE_summary.csv", "bonded", "complex"),
             self.extract_dG_from_summary("complex/ABFE_summary.csv", "coul", "complex"),
             self.extract_dG_from_summary("complex/ABFE_summary.csv", "vdw", "complex"),
         ]
@@ -121,73 +143,94 @@ class ABFEAnalyzer:
                     df[df.state.str.startswith("complex")]["MBAR"].sum(),
             "MBAR_Error": df["MBAR_Error"].sum(),
             "BAR": df[df.state.str.startswith("ligand")]["BAR"].sum() + df[df.state == "anal_rest"]["BAR"].sum() -
-                   df[df.state.str.startswith("complex")]["BAR"].sum(),
+                df[df.state.str.startswith("complex")]["BAR"].sum(),
             "BAR_Error": df["BAR_Error"].sum(),
             "TI": df[df.state.str.startswith("ligand")]["TI"].sum() + df[df.state == "anal_rest"]["TI"].sum() -
-                  df[df.state.str.startswith("complex")]["TI"].sum(),
+                df[df.state.str.startswith("complex")]["TI"].sum(),
             "TI_Error": df["TI_Error"].sum(),
         }
         df = pd.concat([df, pd.DataFrame([totals])], ignore_index=True)
         df.to_csv("abfe_results.csv", index=False)
         logger.info(f"Results written to abfe_results.csv")
 
-    def process_complex(self, abfe_path: str):
-        logger.info(f"Processing COMPLEX at {abfe_path}")
-        self.check_folder(abfe_path)
-        os.chdir(abfe_path)
-        self.check_folder("complex")
-        self.create_folder("analysis")
-        self.copy_dhdl_files("complex", "analysis/complex", self.legs_config["complex"], "complex")
-        self.analyse_dhdl("analysis/complex")
-
-    def process_ligand(self, abfe_path: str):
-        logger.info(f"Processing LIGAND at {abfe_path}")
-        self.check_folder(abfe_path)
-        os.chdir(abfe_path)
-        self.check_folder("ligand")
-        self.copy_dhdl_files("ligand", "analysis/ligand", self.legs_config["ligand"], "ligand")
-        self.analyse_dhdl("analysis/ligand")
-
-    @staticmethod
-    def create_symlink(src_path: str, dst_path: str):
-        if not os.path.exists(dst_path):
-            os.symlink(src_path, dst_path)
-            logger.info(f"Created symlink: {dst_path} -> {src_path}")
+    def create_symlink(self, src: str, dst: str):
+        if not os.path.exists(src):
+            raise FileNotFoundError(f"Cannot symlink: source does not exist: {src}")
+        if not os.path.exists(dst):
+            os.symlink(src, dst)
+            logger.info(f"Created symlink: {dst} -> {src}")
         else:
-            logger.info(f"Symlink already exists: {dst_path}")
+            logger.info(f"Symlink already exists: {dst}")
 
-    def run(self, folders: List[str] = None):
-        folders = folders or [
-            d for d in os.listdir(self.project_root)
-            if os.path.isdir(os.path.join(self.project_root, d)) and d not in self.ignore_folders
-        ]
-        logger.info(f"Found simulation folders: {folders}")
+    def process_complex(self, path: str):
+        summary_file = os.path.join(path, "analysis", "complex", "ABFE_summary.csv")
+        if os.path.exists(summary_file):
+            logger.info(f"Complex analysis already done at {summary_file}, skipping.")
+            return
 
-        # Define reference ligand analysis path (first folder + first replicate)
-        reference_folder = folders[0]
-        reference_subdir = self.abfe_subdirs[0]
-        reference_path = os.path.join(self.project_root, reference_folder, reference_subdir)
+        self.check_folder(path)
+        self.check_folder(os.path.join(path, "complex"))
+        self.create_folder(os.path.join(path, "analysis"))
+        self.copy_dhdl_files(
+            os.path.join(path, "complex"),
+            os.path.join(path, "analysis", "complex"),
+            self.legs_config["complex"],
+            "complex"
+        )
+        self.analyse_dhdl(os.path.join(path, "analysis", "complex"))
 
-        # Analyze ligand only ONCE for reference
+    def process_ligand(self, path: str):
+        summary_file = os.path.join(path, "analysis", "ligand", "ABFE_summary.csv")
+        if os.path.exists(summary_file):
+            logger.info(f"Ligand analysis already done at {summary_file}, skipping.")
+            return
+
+        self.check_folder(path)
+        self.check_folder(os.path.join(path, "ligand"))
+        self.create_folder(os.path.join(path, "analysis"))
+        self.copy_dhdl_files(
+            os.path.join(path, "ligand"),
+            os.path.join(path, "analysis", "ligand"),
+            self.legs_config["ligand"],
+            "ligand"
+        )
+        self.analyse_dhdl(os.path.join(path, "analysis", "ligand"))
+
+    def run(self):
+        abfe_paths = sorted([
+            os.path.join(self.project_root, d)
+            for d in os.listdir(self.project_root)
+            if d.startswith("abfe_van") and os.path.isdir(os.path.join(self.project_root, d))
+        ])
+        logger.info(f"ABFE replicate folders to process: {abfe_paths}")
+
+        abfe_paths = [p for p in abfe_paths if any(p.endswith(f"_r{i+1}") for i in range(self.abfe_replicates))]
+
+        reference_path = os.path.join(self.project_root, "abfe_van1_hrex_r1")
+        self.check_folder(reference_path)
         self.process_ligand(reference_path)
 
-        # Analyze complex for all folders and subdirs
-        for folder in folders:
-            for subdir in self.abfe_subdirs:
-                replicate_path = os.path.join(self.project_root, folder, subdir)
-                self.process_complex(replicate_path)
+        ref_lig_path = os.path.join(reference_path, "analysis", "ligand")
+        for path in abfe_paths:
+            if path != reference_path:
+                dst_lig = os.path.join(path, "analysis", "ligand")
+                self.create_folder(os.path.join(path, "analysis"))
+                self.create_symlink(ref_lig_path, dst_lig)
 
-        # Symlink ligand analyses for other replicates
-        ref_ligand_analysis_path = os.path.join(reference_path, "analysis", "ligand")
-        for folder in folders:
-            for subdir in self.abfe_subdirs:
-                replicate_path = os.path.join(self.project_root, folder, subdir)
-                ligand_analysis_dst = os.path.join(replicate_path, "analysis", "ligand")
-                if replicate_path != reference_path:
-                    self.create_symlink(ref_ligand_analysis_path, ligand_analysis_dst)
+        for path in abfe_paths:
+            self.process_complex(path)
 
-        # Compile results for all folders/subdirs
-        for folder in folders:
-            for subdir in self.abfe_subdirs:
-                replicate_path = os.path.join(self.project_root, folder, subdir)
-                self.compile_results(replicate_path)
+        for path in abfe_paths:
+            self.compile_results(path)
+
+def main():
+    parser = argparse.ArgumentParser(description="Run ABFE analysis on multiple replicates.")
+    parser.add_argument("--root", required=True, help="Root directory containing abfe_van* folders")
+    parser.add_argument("--nrep", required=True, type=int, help="Number of ABFE replicates")
+    args = parser.parse_args()
+
+    analyzer = ABFEAnalyzer(project_root=args.root, abfe_replicates=args.nrep)
+    analyzer.run()
+
+if __name__ == "__main__":
+    main()
