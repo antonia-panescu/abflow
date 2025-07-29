@@ -106,7 +106,7 @@ class ABFEAnalyzer:
             self.extract_dG_from_summary("ligand/ABFE_summary.csv", "coul", "ligand"),
             self.extract_dG_from_summary("ligand/ABFE_summary.csv", "vdw", "ligand"),
             ["anal_rest", rest_dG, 0, rest_dG, 0, rest_dG, 0],
-            self.extract_dG_from_summary("complex/ABFE_summary.csv", "bonded", "complex"),
+            self.extract_dG_from_summary("complex/ABFE_summary.csv", "rest", "complex"),
             self.extract_dG_from_summary("complex/ABFE_summary.csv", "coul", "complex"),
             self.extract_dG_from_summary("complex/ABFE_summary.csv", "vdw", "complex"),
         ]

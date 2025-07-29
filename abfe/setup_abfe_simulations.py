@@ -15,6 +15,9 @@ from abfe.utils.abfe_helpers_hrex import (
     gen_hrex_submission_script
 )
 
+from abfe.utils.ligand_only_setup import LigandOnlySetup
+#LigandOnlySetup(ligand_name="unk", abfe_dir=Path("abfe_van1_hrex_r1")).setup()
+
 
 class ABFESetup:
     """
@@ -46,10 +49,21 @@ class ABFESetup:
 
             logging.info(f"Setting up ABFE folders for ligand: {ligand}")
 
-            for rep in range(1, self.num_replicates + 1):
-                suffix = f"van1_hrex_r{rep}"
-                vanilla_folder_name = f"vanilla_rep_{rep}"
-                self._setup_abfe_folder(ligand_dir, suffix, vanilla_folder_name)
+            # Find all vanilla_rep_* folders
+            vanilla_folders = sorted([f for f in ligand_dir.glob("vanilla_rep_*") if f.is_dir()])
+
+            for vanilla_folder in vanilla_folders:
+                try:
+                    # Extract the index from the folder name: vanilla_rep_1 -> 1
+                    vanilla_index = int(vanilla_folder.name.split("_")[-1])
+                except ValueError:
+                    logging.warning(f"Could not parse index from folder name: {vanilla_folder.name}")
+                    continue
+
+                for rep in range(1, self.num_replicates + 1):
+                    suffix = f"van{vanilla_index}_hrex_r{rep}"
+                    self._setup_abfe_folder(ligand_dir, suffix, vanilla_folder.name)
+
 
     def _setup_abfe_folder(self, ligand_dir: Path, suffix: str, vanilla_folder_name: str):
         try:
