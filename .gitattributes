@@ -1,0 +1,6 @@
+# Tell Linguist to ignore test data and configs for language stats
+abflow.egg-info/ linguist-vendored
+abfe/test/ linguist-vendored
+*.md linguist-documentation
+*.yml linguist-documentation
+*.toml linguist-documentation
