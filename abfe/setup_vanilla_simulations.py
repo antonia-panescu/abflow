@@ -13,7 +13,7 @@ from abfe.utils.gromacs_helpers_single_chain import (
     param_lig, organize_topologies, addligtop, addliggro,
     addligposres, extract_membrane_from_charmm,
     copy_complex2membrane, addmemtop, solvate_system,
-    cp_mdps, addions, create_index )
+    cp_mdps, addions, create_index)
 
 mdp_dir = files('abfe.utils.data.mdps') / 'mdps_vanilla_memprot'
 submission_script_templates = files(
@@ -61,13 +61,26 @@ class SimulationSetup:
         addligtop(sdf_file)
         addliggro(sdf_file)
         addligposres(sdf_file)
-        extract_membrane_from_charmm()
+
+        
+        charmm_gro = os.path.join(self.charmm_folder, "step5_input.gro")
+        membrane_out = os.path.join(vanilla_path, "membrane.gro")
+        extract_membrane_from_charmm(charmm_gro, membrane_out)
+        
+        
         copy_complex2membrane()
         addmemtop(sdf_file)
         solvate_system(self.solvate_water_count)  
         cp_mdps(mdp_dir)  
-        merge_gro_files('solv_fix.gro', self.crystal_water_gro)   ### ALSO CHANGE (?)
+
+        merge_gro_files('solv_fix.gro', self.crystal_water_gro.resolve())
+
+
         add_water2topology(self.crystal_water_count)
+
+        #update_topol_top_with_molecules_block('solv_fix_crystal_water.gro')
+
+
         addions('solv_fix_crystal_water.gro')  ## output from water_deletor.pl in solvate_system
         create_index('system_solv_ions.gro')  ## output from addions
         addtoppar2top("topol.top")  ## make specific?

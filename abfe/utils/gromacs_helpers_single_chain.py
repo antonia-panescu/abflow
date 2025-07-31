@@ -5,6 +5,7 @@ import sys
 import subprocess
 import glob
 import importlib.resources
+from importlib.resources import files
 from importlib.abc import Traversable
 from pathlib import Path
 
@@ -430,11 +431,9 @@ def addligposres(ligand_sdf,xml_file=None):
     
     add_ligposres_to_topol(ligand_name)
 
-def extract_membrane_from_charmm():
-    """
-    Extracts the membrane from the CHARMM complex file and saves it as 'membrane.gro'
-    """
-    extract_membrane('charmm_gmx/step5_input.gro','membrane.gro')
+def extract_membrane_from_charmm(charmm_gro_path, output_path):
+    extract_membrane(charmm_gro_path, output_path)
+
 
 
 def includememtop(patterns, lines_to_add):
@@ -564,7 +563,8 @@ def solvate_system(water_count = 0):
         raise Exception("Error: gmx solvate command failed.")
     
     # Execute water_deletor.pl command
-    perl_script_path = str(Path(__file__).parent / "water_deletor.pl")
+    perl_script_path = files("abfe.utils") / "water_deletor.pl"
+    perl_script_path = str(perl_script_path)
     
 
     try:

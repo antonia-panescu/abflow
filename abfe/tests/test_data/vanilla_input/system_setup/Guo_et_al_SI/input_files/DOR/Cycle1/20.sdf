@@ -1,0 +1,431 @@
+20_2
+                    3D
+ Schrodinger Suite 2022-1.
+ 68 74  0  0  1  0            999 V2000
+   42.0683   37.4692   44.2205 C   0  0  0  0  0  0
+   40.5617   37.4775   44.3245 C   0  0  0  0  0  0
+   39.8679   38.8326   44.4297 C   0  0  0  0  0  0
+   41.3972   37.0264   45.4989 C   0  0  0  0  0  0
+   41.4906   40.8241   42.6965 C   0  0  0  0  0  0
+   40.6008   39.6514   42.1798 C   0  0  2  0  0  0
+   39.3014   37.9044   39.3087 C   0  0  0  0  0  0
+   38.0201   40.9503   41.7844 C   0  0  0  0  0  0
+   40.0532   39.8771   40.7296 C   0  0  2  0  0  0
+   41.6129   43.4682   42.7490 C   0  0  0  0  0  0
+   41.0499   42.2410   42.3392 C   0  0  0  0  0  0
+   41.1636   40.0249   39.6603 C   0  0  0  0  0  0
+   41.1435   44.6858   42.1929 C   0  0  0  0  0  0
+   40.0355   42.3284   41.3767 C   0  0  0  0  0  0
+   39.2265   41.1888   40.8299 C   0  0  2  0  0  0
+   40.5816   40.3549   38.2735 C   0  0  0  0  0  0
+   39.5799   43.4750   40.7539 C   0  0  0  0  0  0
+   40.1391   44.6933   41.1911 C   0  0  0  0  0  0
+   38.7429   41.8223   39.4844 C   0  0  2  0  0  0
+   39.7191   41.6185   38.3028 C   0  0  0  0  0  0
+   39.4564   39.3515   43.0995 N   0  3  2  0  0  0
+   40.2961   37.8521   38.5895 O   0  0  0  0  0  0
+   39.1497   38.7862   40.3102 N   0  0  0  0  0  0
+   38.1591   36.9027   39.1192 C   0  0  0  0  0  0
+   38.6691   43.2352   39.7612 O   0  0  0  0  0  0
+   39.7272   45.8685   40.6353 O   0  0  0  0  0  0
+   39.7822   42.4314   37.3835 O   0  0  0  0  0  0
+   38.4566   40.4528   43.1803 C   0  0  0  0  0  0
+   37.8368   36.7237   37.7063 N   0  0  0  0  0  0
+   37.0348   37.5218   36.9809 C   0  0  0  0  0  0
+   36.8417   37.1243   35.5424 C   0  0  0  0  0  0
+   36.4782   38.5191   37.4467 O   0  0  0  0  0  0
+   36.6322   38.1174   34.5589 C   0  0  0  0  0  0
+   36.4174   37.7212   33.2256 C   0  0  0  0  0  0
+   36.4127   36.3485   32.9204 C   0  0  0  0  0  0
+   36.6252   35.4297   33.9646 C   0  0  0  0  0  0
+   36.8299   35.8022   35.2457 N   0  0  0  0  0  0
+   42.5273   36.7005   43.5987 H   0  0  0  0  0  0
+   42.5801   38.4317   44.2262 H   0  0  0  0  0  0
+   40.0133   36.7143   43.7721 H   0  0  0  0  0  0
+   40.5792   39.5181   44.8925 H   0  0  0  0  0  0
+   39.0125   38.7654   45.1039 H   0  0  0  0  0  0
+   41.4602   37.6928   46.3593 H   0  0  0  0  0  0
+   41.4074   35.9616   45.7317 H   0  0  0  0  0  0
+   41.6437   40.7663   43.7737 H   0  0  0  0  0  0
+   42.4863   40.7073   42.2668 H   0  0  0  0  0  0
+   41.2389   38.7681   42.1802 H   0  0  0  0  0  0
+   37.3202   40.2367   41.3492 H   0  0  0  0  0  0
+   37.4418   41.8682   41.9011 H   0  0  0  0  0  0
+   42.4141   43.4826   43.4737 H   0  0  0  0  0  0
+   41.8730   40.8058   39.9356 H   0  0  0  0  0  0
+   41.7527   39.1094   39.5955 H   0  0  0  0  0  0
+   41.5831   45.6174   42.5183 H   0  0  0  0  0  0
+   41.3920   40.4976   37.5578 H   0  0  0  0  0  0
+   39.9778   39.5284   37.8990 H   0  0  0  0  0  0
+   37.7674   41.4340   39.1910 H   0  0  0  0  0  0
+   38.3110   38.6781   40.8636 H   0  0  0  0  0  0
+   37.2738   37.2758   39.6353 H   0  0  0  0  0  0
+   38.4041   35.9393   39.5701 H   0  0  0  0  0  0
+   39.0417   45.7651   39.9934 H   0  0  0  0  0  0
+   37.5765   40.1103   43.7250 H   0  0  0  0  0  0
+   38.8681   41.2793   43.7610 H   0  0  0  0  0  0
+   38.2248   35.9172   37.2358 H   0  0  0  0  0  0
+   36.6361   39.1672   34.8149 H   0  0  0  0  0  0
+   36.2571   38.4572   32.4514 H   0  0  0  0  0  0
+   36.2513   36.0065   31.9085 H   0  0  0  0  0  0
+   36.6273   34.3679   33.7673 H   0  0  0  0  0  0
+   38.9770   38.5811   42.6534 H   0  0  0  0  0  0
+  1  2  1  0  0  0
+  1  4  1  0  0  0
+  1 38  1  0  0  0
+  1 39  1  0  0  0
+  2  3  1  0  0  0
+  2  4  1  0  0  0
+  2 40  1  0  0  0
+  3 21  1  0  0  0
+  3 41  1  0  0  0
+  3 42  1  0  0  0
+  4 43  1  0  0  0
+  4 44  1  0  0  0
+  5  6  1  0  0  0
+  5 11  1  0  0  0
+  5 45  1  0  0  0
+  5 46  1  0  0  0
+  6  9  1  0  0  0
+  6 21  1  0  0  0
+  6 47  1  0  0  0
+  7 22  2  0  0  0
+  7 23  1  0  0  0
+  7 24  1  0  0  0
+  8 15  1  0  0  0
+  8 28  1  0  0  0
+  8 48  1  0  0  0
+  8 49  1  0  0  0
+  9 12  1  0  0  0
+  9 15  1  0  0  0
+  9 23  1  0  0  0
+ 10 11  2  0  0  0
+ 10 13  1  0  0  0
+ 10 50  1  0  0  0
+ 11 14  1  0  0  0
+ 12 16  1  0  0  0
+ 12 51  1  0  0  0
+ 12 52  1  0  0  0
+ 13 18  2  0  0  0
+ 13 53  1  0  0  0
+ 14 15  1  0  0  0
+ 14 17  2  0  0  0
+ 15 19  1  0  0  0
+ 16 20  1  0  0  0
+ 16 54  1  0  0  0
+ 16 55  1  0  0  0
+ 17 18  1  0  0  0
+ 17 25  1  0  0  0
+ 18 26  1  0  0  0
+ 19 20  1  0  0  0
+ 19 25  1  0  0  0
+ 19 56  1  0  0  0
+ 20 27  2  0  0  0
+ 21 28  1  0  0  0
+ 21 68  1  0  0  0
+ 23 57  1  0  0  0
+ 24 29  1  0  0  0
+ 24 58  1  0  0  0
+ 24 59  1  0  0  0
+ 26 60  1  0  0  0
+ 28 61  1  0  0  0
+ 28 62  1  0  0  0
+ 29 30  1  0  0  0
+ 29 63  1  0  0  0
+ 30 31  1  0  0  0
+ 30 32  2  0  0  0
+ 31 33  2  0  0  0
+ 31 37  1  0  0  0
+ 33 34  1  0  0  0
+ 33 64  1  0  0  0
+ 34 35  2  0  0  0
+ 34 65  1  0  0  0
+ 35 36  1  0  0  0
+ 35 66  1  0  0  0
+ 36 37  2  0  0  0
+ 36 67  1  0  0  0
+M  CHG  1  21   1
+M  END
+> <i_m_stars>
+0
+
+> <s_m_entry_id>
+120
+
+> <s_m_entry_name>
+Structure120
+
+> <s_pdb_PDB_TITLE>
+1.8 A STRUCTURE OF THE HUMAN DELTA OPIOID 7TM RECEPTOR (PSI COMMUNITY TARGET)
+
+> <s_pdb_PDB_ID>
+4N6H
+
+> <r_pdb_PDB_CRYST1_a>
+86.23
+
+> <r_pdb_PDB_CRYST1_b>
+72.851
+
+> <r_pdb_PDB_CRYST1_c>
+84.408
+
+> <r_pdb_PDB_CRYST1_alpha>
+90
+
+> <r_pdb_PDB_CRYST1_beta>
+107.48
+
+> <r_pdb_PDB_CRYST1_gamma>
+90
+
+> <s_pdb_PDB_CRYST1_Space_Group>
+C 1 2 1
+
+> <i_pdb_PDB_CRYST1_z>
+4
+
+> <s_pdb_PDB_CLASSIFICATION>
+SIGNALING PROTEIN
+
+> <s_pdb_PDB_DEPOSITION_DATE>
+12-OCT-13
+
+> <s_pdb_PDB_format_version>
+3.30
+
+> <r_pdb_PDB_R>
+0.172
+
+> <r_pdb_PDB_Rfree>
+0.19
+
+> <r_pdb_PDB_RESOLUTION>
+1.8
+
+> <s_pdb_PDB_EXPDTA>
+X-RAY DIFFRACTION
+
+> <r_pdb_PDB_EXPDTA_TEMPERATURE>
+100
+
+> <r_pdb_PDB_EXPDTA_PH>
+6.1
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Chains>
+A
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Matrix_1>
+1.000000 0.000000 0.000000   0.000000;0.000000 1.000000 0.000000   0.000000;0.000000 0.000000 1.000000   0.000000
+
+> <s_m_Source_Path>
+C:\Users\Qinru\Documents\Schrodinger\glide-dock_XP_25
+
+> <s_m_Source_File>
+glide-dock_XP_25_pv.maegz
+
+> <i_m_Source_File_Index>
+1
+
+> <b_ppw_prepared>
+1
+
+> <s_ppw_prepared_with_version>
+2022-1
+
+> <b_ppw_created_disulfur>
+1
+
+> <r_ppw_preprocess_pH>
+7.4
+
+> <s_ppw_het_states>
+eJztl0GOwjAMRa9SdV1QYztpw1UQN0CzmxXi7pPYTb+bmRMwZYHMU+IfOx+rfY083oZ7+XAI8zTMj2moYZiGS9hiAmaEgjAiTAgXhCvCrInrj03RBAi6Bpy46QYcwdSPIAJEBakHC8CiYIWsgVxXFHKZr+Vgr/c0fH0/n/Zd+Sh7rwi9ooAQrSK0itAqQqsIrSK0itAqynvIUGOoMdQYagw1hhpDjaHGUGOoCdQEaoJLEagJ1ARqAjWBmkBNoBZVbTMEqSFqRzcpA/VEdAAwBKllalHkgcAhpB4i7gCnDvgtaqp6ceSBuIOJrogdYLdCbUepA+xqSbrCHV19WD3QtqwKMlbkliPAGoeDsfUDt8VWLfcgdUBQC1u11AO3xaqNHfBbYq+S2kU1oNUyqmWtllGtAS+bmx2aFe3oSCqaVJBULEfuQHQ5MkAh87XcVKn3NaZIufzjDRynQbXrvx0DLTzHwDkGPnYMhGtIK7kxYOAcA3vD3dNAe1Y858A5Bz5uDiwxh8McqOD96+Ug7i8HMWx774/6OPHHu8T7BwSqySg=
+
+> <r_i_Potential_Energy-S-OPLS>
+-1891.6937183603
+
+> <r_i_RMS_Derivative-S-OPLS>
+0.0876579495695794
+
+> <r_i_Max_Derivative-S-OPLS>
+1.36891850910748
+
+> <r_i_Stretch_Energy-S-OPLS>
+196.019904568711
+
+> <r_i_Bend_Energy-S-OPLS>
+837.747830516092
+
+> <r_i_LJ-14_Energy-S-OPLS>
+1942.59172409378
+
+> <r_i_El-14_Energy-S-OPLS>
+842.507299463896
+
+> <r_i_Van_der_Waals_Energy-S-OPLS>
+-3971.43755688513
+
+> <r_i_Electrostatic_Energy-S-OPLS>
+-2483.17472526914
+
+> <r_i_Dihedral_Energy-S-OPLS>
+708.512118189125
+
+> <r_i_target_temperature>
+298
+
+> <s_m_job_name>
+proteinprep_47
+
+> <i_glide_grid_version>
+94137
+
+> <r_glide_gridbox_xcent>
+-5.95118111764706
+
+> <r_glide_gridbox_ycent>
+-71.0773310147059
+
+> <r_glide_gridbox_zcent>
+71.0335061764706
+
+> <r_glide_gridbox_xrange>
+22
+
+> <r_glide_gridbox_yrange>
+22
+
+> <r_glide_gridbox_zrange>
+22
+
+> <r_glide_gridbox_ligxrange>
+10
+
+> <r_glide_gridbox_ligyrange>
+10
+
+> <r_glide_gridbox_ligzrange>
+10
+
+> <s_glide_grid_type>
+glide
+
+> <b_glide_receptor>
+1
+
+> <i_lp_mmshare_version>
+57137
+
+> <i_f3d_flags>
+0
+
+> <s_epik_input>
+W0NIMl0xW0NIMl1DKD1PKVtDQEBIXTJPYyhjKFtPSF0pW2NIXVtjSF0zKWM0YzNbQ0gyXVtDQEBIXShOKFtDSDJdW0NIMl01KVtDSDJdW0NIXTZbQ0gyXVtDSDJdNilbQ0BdMShbQ0BdMjQ1KVtOSF1DKD1PKVtDSDJdW05IXUMoPU8pYzdbY0hdW2NIXVtjSF1bY0hdbjc=
+
+> <s_epik_cmdline>
+J2VwaWtfcHl0aG9uJywgJy1waCcsICc3LjQnLCAnLXRuJywgJzgnLCAnLW1hJywgJzgwMCcsICctaW1hZScsICc8aW5maWxlLm1hZT4nLCAnLW9tYWUnLCAnPG91dGZpbGUubWFlPic=
+
+> <r_lp_tautomer_probability>
+0.999999979999776
+
+> <r_epik_Ionization_Penalty>
+  0.2746
+
+> <r_epik_Ionization_Penalty_Charging>
+  0.1840
+
+> <r_epik_Ionization_Penalty_Neutral>
+  0.0906
+
+> <r_epik_State_Penalty>
+  0.3557
+
+> <r_epik_Charging_Adjusted_Penalty>
+0.539671641894022
+
+> <i_epik_Tot_Q>
+1
+
+> <i_epik_Tot_abs_Q>
+1
+
+> <s_lp_Force_Field>
+S-OPLS
+
+> <r_lp_Energy>
+70.925134
+
+> <b_lp_Chiralities_Consistent>
+1
+
+> <s_lp_Variant>
+20.mol-1
+
+> <s_i_glide_gridfile>
+glide-grid_5
+
+> <i_i_glide_lignum>
+1
+
+> <i_i_glide_rotatable_bonds>
+9
+
+> <r_i_docking_score>
+-11.2597932777982
+
+> <r_i_glide_ligand_efficiency>
+-0.304318737237788
+
+> <r_i_glide_ligand_efficiency_sa>
+-1.0140575448685
+
+> <r_i_glide_ligand_efficiency_ln>
+-2.44198519494809
+
+> <r_glide_XP_GScore>
+-11.6154932777982
+
+> <r_i_glide_gscore>
+-11.6154932777982
+
+> <r_i_glide_evdw>
+-48.9790687561035
+
+> <r_i_glide_ecoul>
+-13.4100704193115
+
+> <r_i_glide_energy>
+-62.389139175415
+
+> <r_i_glide_einternal>
+3.02891945838928
+
+> <r_i_glide_emodel>
+-109.402979792321
+
+> <r_glide_XP_HBond>
+-2.80413235601576
+
+> <i_i_glide_confnum>
+1
+
+> <i_i_glide_posenum>
+1
+
+> <r_i_glide_eff_state_penalty>
+0.3557
+
+> <i_glide_XP_PoseRank>
+1
+
+> <s_m_subgroup_title>
+glide-dock_XP_25_pv
+
+> <s_m_subgroupid>
+glide-dock_XP_25_pv
+
+> <b_m_subgroup_collapsed>
+0
+
+$$$$
