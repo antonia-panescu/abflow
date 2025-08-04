@@ -586,27 +586,53 @@ def solvate_soluble_system():
     except subprocess.CalledProcessError:
         raise Exception("Error: gmx solvate command failed.")
 
-def update_topology_file(new_water_count = 0):
-    """
-    Updates the water count in the topology file by asking the user for a new water count
-    """
-    if new_water_count == 0:
+#def update_topology_file(new_water_count = 0):
+#    """
+#    Updates the water count in the topology file by asking the user for a new water count
+#    """
+#    if new_water_count == 0:
         # Prompt the user for an input number
-        new_water_count = input("Enter the new water count: ")
+#        new_water_count = input("Enter the new water count: ")
 
     # Read the content of the topology file
+#    with open("topol.top", "r") as file:
+#        lines = file.readlines()
+
+    # Find and replace the line starting with 'SOL'
+#    for i, line in enumerate(lines):
+#        if line.startswith('SOL'):
+#            lines[i] = f'SOL        {new_water_count}\n'
+#            break
+
+    # Write the modified content back to the topology file
+#    with open("topol.top", "w") as file:
+#        file.writelines(lines)
+
+
+
+def update_topology_file(new_water_count: int = 0):
+    """
+    Set the water molecule count in topol.top to new_water_count.
+    Recognises SOL, TP3, WAT and HOH as solvent names.
+    """
+    if new_water_count == 0:
+        new_water_count = input("Enter the new water count: ")
+
     with open("topol.top", "r") as file:
         lines = file.readlines()
 
-    # Find and replace the line starting with 'SOL'
+    solvent_keys = ("SOL", "TP3", "WAT", "HOH")
     for i, line in enumerate(lines):
-        if line.startswith('SOL'):
-            lines[i] = f'SOL        {new_water_count}\n'
+        tokens = line.split()
+        if tokens and tokens[0] in solvent_keys:
+            lines[i] = f"{tokens[0]:<10}{new_water_count}\n"
             break
 
-    # Write the modified content back to the topology file
     with open("topol.top", "w") as file:
         file.writelines(lines)
+
+
+
 
 def addions(input_file = "solv_fix.gro",water_group = '18'):
     """
