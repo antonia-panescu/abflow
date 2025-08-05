@@ -1,0 +1,19 @@
+# Tell Linguist to ignore test data and configs for language stats
+abflow.egg-info/ linguist-vendored
+abfe/test/ linguist-vendored
+*.md linguist-documentation
+*.yml linguist-documentation
+*.toml linguist-documentation
+*.gro linguist-vendored
+*.top linguist-vendored
+*.itp linguist-vendored
+*.mdp linguist-vendored
+*.pdb linguist-vendored
+*.sdf linguist-vendored
+*.rtf linguist-vendored
+
+# Force Python detection for notebooks or other Python‑adjacent formats
+*.py linguist-language=Python
+
+# Optionally mark other file types as generated (ignored from stats)
+# *.txt linguist-generated

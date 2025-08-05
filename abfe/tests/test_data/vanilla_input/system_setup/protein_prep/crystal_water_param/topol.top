@@ -1,0 +1,42 @@
+;
+;	File 'topol.top' was generated
+;	By user: reub0138 (14998)
+;	On host: absolut
+;	At date: Thu Dec  5 13:29:06 2024
+;
+;	This is a standalone topology file
+;
+;	Created by:
+;	                    :-) GROMACS - gmx pdb2gmx, 2020.3 (-:
+;	
+;	Executable:   /sbcb/packages/opt/Linux_x86_64/gromacs/2020.3_GCC6.2_CUDA10.1.AVX2/bin/gmx
+;	Data prefix:  /sbcb/packages/opt/Linux_x86_64/gromacs/2020.3_GCC6.2_CUDA10.1.AVX2
+;	Working dir:  /biggin/b211/reub0138/Projects/orexin/deflorian_A2A_v1/system_setup/protein_prep/crystal_water_param
+;	Command line:
+;	  gmx pdb2gmx -f crystal_waters_aligned2charmm.pdb -o crystal_waters_aligned2charmm.gro -water tip3 -ignh
+;	Force field was read from current directory or a relative path - path added.
+;
+
+; Include forcefield parameters
+#include "./amber99sb-star-ildn-mut.ff/forcefield.itp"
+
+; Include water topology
+#include "./amber99sb-star-ildn-mut.ff/tip3p.itp"
+
+#ifdef POSRES_WATER
+; Position restraint for each water oxygen
+[ position_restraints ]
+;  i funct       fcx        fcy        fcz
+   1    1       1000       1000       1000
+#endif
+
+; Include topology for ions
+#include "./amber99sb-star-ildn-mut.ff/ions.itp"
+
+[ system ]
+; Name
+Protein
+
+[ molecules ]
+; Compound        #mols
+SOL               136

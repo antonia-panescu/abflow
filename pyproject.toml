@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abflow"
+version = "0.1.0"
+description = "Automated free energy simulation workflows for ligand binding"
+authors = [
+    { name = "Antonia Panescu", email = "antonia.panescu@outlook.com" }
+]
+dependencies = [
+    "MDAnalysis",
+    "openff-toolkit",
+    "numpy",
+    "scipy"
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["abfe*"]
+
+[tool.setuptools.package-data]
+"abfe.utils" = ["water_deletor.pl"]
+
+# Include all .sh files in all subfolders of job_script_template
+"abfe.utils.cluster.job_script_template" = ["**/*.sh"]
+
+# Include all .mdp files in all mdps subfolders
+"abfe.utils.data.mdps" = ["**/*.mdp"]
+
+# Include everything in the forcefield directory
+"abfe.utils.data.forcefield_dir" = ["**/*"]
+
+# Include everything in ligand_only
+"abfe.utils.data.ligand_only" = ["**/*"]
+
