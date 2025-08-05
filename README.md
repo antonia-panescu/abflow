@@ -1,5 +1,40 @@
 # ABFE_Package
 Code for setting up and running replica ABFE simulations
+Got it — here’s a clean README section with just your **install from source** steps:
+
+---
+
+## Install from Source
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/Nithishwer/abflow.git
+cd your-repo
+```
+
+2. **Create and activate the conda environment**
+
+```bash
+conda env create -f abfe_environment.yml
+conda activate abflow
+```
+
+3. **Install `MDRestraintsGenerator`**
+
+```bash
+cd src
+git clone https://github.com/Nithishwer/MDRestraintsGenerator.git
+cd MDRestraintsGenerator
+pip install --no-deps .
+```
+
+4. **Install this repository**
+
+```bash
+cd ..
+pip install .
+```
 
 ## HPC-specific dependencies
 
