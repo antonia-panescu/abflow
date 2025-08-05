@@ -396,7 +396,6 @@ dependencies:
   - zstandard=0.23.0=py310ha75aee5_2
   - zstd=1.5.7=hb8e6e7a_2
   - pip:
-      - abflow==0.1.0
       - amberutils==21.0
       - biotite==1.1.0
       - biotraj==1.2.2
@@ -413,6 +412,7 @@ dependencies:
       - propka==3.5.1
       - pymsmt==22.0
       - pynndescent==0.5.13
+      - pytest==8.4.1
       - pytraj==2.0.6
       - sander==22.0
       - umap-learn==0.5.7
