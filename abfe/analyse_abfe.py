@@ -22,7 +22,7 @@ class ABFEAnalyzer:
         self.abfe_replicates = abfe_replicates
         self.ignore_folders = ignore_folders or []
         self.legs_config = legs_config or {
-            "complex": {"bonded": 11, "coul": 10, "vdw": 21},
+            "complex": {"rest": 11, "coul": 10, "vdw": 21},
             "ligand": {"coul": 11, "vdw": 21},
         }
         self.temperature = temperature
@@ -73,17 +73,31 @@ class ABFEAnalyzer:
             T=self.temperature,
             outdirectory="./",
         )
-        workflow.run(
-            skiptime=10,
-            uncorr="dhdl",
-            threshold=50,
-            methods=("MBAR", "BAR", "TI"),
-            overlap="O_MBAR.pdf",
-            breakdown=True,
-            n_bootstraps=50,
-            forwrev=10,
-            n_jobs=1,
-        )
+        try:
+            workflow.run(
+                skiptime=10,
+                uncorr="dhdl",
+                threshold=50,
+                methods=methods,
+                overlap="O_MBAR.pdf",
+                breakdown=True,
+                n_bootstraps=50,
+                forwrev=10,
+                n_jobs=1,
+            )
+        except Exception as e:
+            logger.warning(f"MBAR failed: {e}.  Falling back to BAR and TI.")
+            workflow.run(
+                skiptime=10,
+                uncorr="dhdl",
+                threshold=50,
+                methods=("BAR", "TI"),
+                overlap="O_MBAR.pdf",
+                breakdown=True,
+                n_bootstraps=50,
+                forwrev=10,
+                n_jobs=1,
+            )
         workflow.summary.to_csv("ABFE_summary.csv")
         workflow.convergence.to_csv("ABFE_convergence.csv")
         logger.info(f"Time taken for analysis: {time.time() - start_time:.2f}s")
@@ -128,7 +142,7 @@ class ABFEAnalyzer:
             self.extract_dG_from_summary("ligand/ABFE_summary.csv", "coul", "ligand"),
             self.extract_dG_from_summary("ligand/ABFE_summary.csv", "vdw", "ligand"),
             ["anal_rest", rest_dG, 0, rest_dG, 0, rest_dG, 0],
-            self.extract_dG_from_summary("complex/ABFE_summary.csv", "bonded", "complex"),
+            self.extract_dG_from_summary("complex/ABFE_summary.csv", "rest", "complex"),
             self.extract_dG_from_summary("complex/ABFE_summary.csv", "coul", "complex"),
             self.extract_dG_from_summary("complex/ABFE_summary.csv", "vdw", "complex"),
         ]
