@@ -22,7 +22,7 @@ class ABFEAnalyzer:
         self.abfe_replicates = abfe_replicates
         self.ignore_folders = ignore_folders or []
         self.legs_config = legs_config or {
-            "complex": {"bonded": 11, "coul": 10, "vdw": 21},
+            "complex": {"rest": 11, "coul": 10, "vdw": 21},
             "ligand": {"coul": 11, "vdw": 21},
         }
         self.temperature = temperature

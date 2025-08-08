@@ -21,4 +21,4 @@ ABFE_DEFLORIAN = files("abfe.tests.test_data.abfe_input.deflorian")
 # -------------------------------------------------------------------------
 # ABFE analysis input data for test_analysis_abfe.py
 
-ABFE_ANALYSIS_INPUT = files("abfe.tests.test_data.abfe_analysis_input")
+ABFE_ANALYSIS_INPUT = files("abfe.tests.test_data.abfe_analysis_input.deflorian")

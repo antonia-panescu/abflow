@@ -15,8 +15,8 @@ def test_abfe_analysis_pipeline(tmp_path):
     and verify that analysis folders, symlinks, and output files are created.
     """
     # 1. Setup test directory with input files
-    ligand_name = "A2A_4h"
-    input_dir = datafiles.ABFE_ANALYSIS_INPUT / "A2A_4g"
+    ligand_name = "A2A_4j"
+    input_dir = datafiles.ABFE_ANALYSIS_INPUT / "A2A_4j"
     working_dir = tmp_path / "abfe_analysis_test" / ligand_name
     shutil.copytree(input_dir, working_dir)
 
